@@ -147,7 +147,8 @@ class Renderer:
         self.img_res = cfg.MODEL.IMAGE_SIZE
 
         # add faces that make the hand mesh watertight
-        faces_new = np.array([[92, 38, 234],
+        faces_new = np.array([
+                                [92, 38, 234],
                               [234, 38, 239],
                               [38, 122, 239],
                               [239, 122, 279],
@@ -255,9 +256,9 @@ class Renderer:
         #     baseColorFactor=(*mesh_base_color, 1.0))
         vertex_colors = np.array([(*mesh_base_color, 1.0)] * vertices.shape[0])
         if is_right:
-            mesh = trimesh.Trimesh(vertices.copy() + camera_translation, self.faces.copy(), vertex_colors=vertex_colors)
+            mesh = trimesh.Trimesh(vertices.copy() + camera_translation, self.faces.copy(), vertex_colors=vertex_colors, process=False, validate=False)
         else:
-            mesh = trimesh.Trimesh(vertices.copy() + camera_translation, self.faces_left.copy(), vertex_colors=vertex_colors)
+            mesh = trimesh.Trimesh(vertices.copy() + camera_translation, self.faces_left.copy(), vertex_colors=vertex_colors, process=False, validate=False)
         # mesh = trimesh.Trimesh(vertices.copy(), self.faces.copy())
         
         rot = trimesh.transformations.rotation_matrix(
@@ -342,6 +343,7 @@ class Renderer:
             render_res=[256, 256],
             focal_length=None,
             is_right=None,
+            joints=None
         ):
 
         renderer = pyrender.OffscreenRenderer(viewport_width=render_res[0],
@@ -382,6 +384,7 @@ class Renderer:
         color, rend_depth = renderer.render(scene, flags=pyrender.RenderFlags.RGBA)
         color = color.astype(np.float32) / 255.0
         renderer.delete()
+        color[:, :, -1] = 1
 
         return color
 
